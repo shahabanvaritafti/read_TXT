@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>خواننده متن گیت‌هاب</title>
+    <style>
+        body {
+            font-family: Tahoma, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 20px;
+        }
+        label {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            direction: ltr;
+            text-align: left;
+            font-size: 13px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px 2px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-family: Tahoma, sans-serif;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button.stop {
+            background-color: #e74c3c;
+        }
+        button.stop:hover {
+            background-color: #c0392b;
+        }
+        textarea {
+            width: 100%;
+            height: 180px;
+            padding: 10px;
+            margin-top: 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            resize: vertical;
+            font-family: Tahoma, sans-serif;
+            font-size: 14px;
+        }
+        .controls {
+            margin-top: 15px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>خواننده متن فارسی از گیت‌هاب</h2>
+    
+    <label for="urlInput">لینک Raw فایل متنی در گیت‌هاب:</label>
+    <input type="text" id="urlInput" placeholder="https://raw.githubusercontent.com/username/repo/main/text.txt">
+    
+    <button onclick="loadTextFromGitHub()">بارگذاری متن</button>
+    
+    <textarea id="textContent" placeholder="متن فایل اینجا بارگذاری می‌شود یا می‌توانید خودتان بنویسید..."></textarea>
+    
+    <div class="controls">
+        <button onclick="playSpeech()">پخش 🔊</button>
+        <button onclick="pauseSpeech()">توقف موقت ⏸</button>
+        <button onclick="resumeSpeech()">ادامه ▶</button>
+        <button class="stop" onclick="stopSpeech()">قطع کامل ⏹</button>
+    </div>
+</div>
+
+<script>
+    async function loadTextFromGitHub() {
+        const url = document.getElementById('urlInput').value.trim();
+        if (!url) {
+            alert('لطفاً لینک Raw فایل را وارد کنید.');
+            return;
+        }
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('خطا در دریافت فایل');
+            const text = await response.text();
+            document.getElementById('textContent').value = text;
+        } catch (error) {
+            alert('خطا در بارگذاری فایل. مطمئن شوید لینک Raw و دسترسی مخزن درست است.');
+            console.error(error);
+        }
+    }
+
+    let utterance = null;
+
+    function playSpeech() {
+        const text = document.getElementById('textContent').value;
+        if (!text) {
+            alert('متنی برای خواندن وجود ندارد!');
+            return;
+        }
+
+        // متوقف کردن صحبت قبلی اگر در حال اجراست
+        window.speechSynthesis.cancel();
+
+        utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'fa-IR'; // تنظیم زبان روی فارسی
+        utterance.rate = 1.0; // سرعت خواندن (قابل تنظیم از 0.5 تا 2)
+
+        window.speechSynthesis.speak(utterance);
+    }
+
+    function pauseSpeech() {
+        if (window.speechSynthesis.speaking) {
+            window.speechSynthesis.pause();
+        }
+    }
+
+    function resumeSpeech() {
+        if (window.speechSynthesis.paused) {
+            window.speechSynthesis.resume();
+        }
+    }
+
+    function stopSpeech() {
+        if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
+            window.speechSynthesis.cancel();
+        }
+    }
+</script>
+
+</body>
+</html>
